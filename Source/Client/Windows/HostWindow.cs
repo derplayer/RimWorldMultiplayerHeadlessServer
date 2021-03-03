@@ -1,4 +1,4 @@
-﻿using Multiplayer.Common;
+using Multiplayer.Common;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -55,6 +55,38 @@ namespace Multiplayer.Client
                 debugMode = true;
                 logDesyncTraces = true;
             }
+        }
+
+        public HostWindow(SaveFile file, ServerSettings srvset, bool withSimulation)
+        {
+            closeOnAccept = false;
+            doCloseX = true;
+            settings = srvset;
+
+            this.withSimulation = withSimulation;
+            this.file = file;
+            settings.gameName = file?.gameName ?? Multiplayer.session?.gameName ?? $"{Multiplayer.username}'s game";
+
+            MultiplayerWorldComp.asyncTime = file?.asyncTime ?? false;
+            if (file?.asyncTime ?? false)
+            {
+                asyncTimeLocked = true; // once enabled in a save, cannot be disabled
+            }
+
+            var localAddr = MpUtil.GetLocalIpAddress() ?? "127.0.0.1";
+            settings.lanAddress = localAddr;
+
+            if (MpVersion.IsDebug)
+            {
+                debugMode = true;
+                logDesyncTraces = true;
+            }
+
+            LoadedModManager.GetMod<MultiplayerMod>().WriteSettings();
+            if(file.replay)
+                HostFromReplay(settings);
+            else
+                HostFromSave(settings);
         }
 
         private string maxPlayersBuffer, autosaveBuffer;

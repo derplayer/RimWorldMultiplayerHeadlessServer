@@ -1,4 +1,4 @@
-﻿extern alias zip;
+extern alias zip;
 
 using LiteNetLib;
 using Multiplayer.Common;
@@ -88,11 +88,11 @@ namespace Multiplayer.Client
             GUI.EndGroup();
         }
 
-        private List<SaveFile> spSaves = new List<SaveFile>();
-        private List<SaveFile> mpReplays = new List<SaveFile>();
+        public List<SaveFile> spSaves = new List<SaveFile>();
+        public List<SaveFile> mpReplays = new List<SaveFile>();
         private bool filesRead;
 
-        private void ReloadFiles()
+        public void ReloadFiles()
         {
             selectedFile = null;
 

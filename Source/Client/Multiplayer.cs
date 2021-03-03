@@ -1,4 +1,4 @@
-﻿//extern alias zip;
+//extern alias zip;
 
 using System;
 using System.Collections.Generic;
@@ -202,6 +202,7 @@ namespace Multiplayer.Client
             {
                 username = "The Arbiter";
                 Prefs.VolumeGame = 0;
+                Prefs.RunInBackground = true;
             }
 
             if (GenCommandLine.TryGetCommandLineArg("replay", out string replay))
@@ -226,6 +227,55 @@ namespace Multiplayer.Client
                 ExtendDirectXmlSaver.extend = true;
                 DirectXmlSaver.SaveDataObject(new SyncContainer(), "SyncHandlers.xml");
                 ExtendDirectXmlSaver.extend = false;
+            }
+
+            if (GenCommandLine.CommandLineArgPassed("host"))
+            {
+                username = "The Server";
+                Prefs.VolumeGame = 0;
+                Prefs.RunInBackground = true;
+
+                var settings = new ServerSettings
+                {
+                    arbiter = true,
+                    autosaveInterval = 1.5f,
+                    bindAddress = "0.0.0.0",
+                    bindPort = 25565,
+                    debugMode = false,
+                    direct = true,
+                    directAddress = "0.0.0.0",
+                    gameName = "derplayers headless mode",
+                    maxPlayers = 8,
+                    pauseOnAutosave = false,
+                    steam = false,
+                    lan = true
+                };
+                MultiplayerMod.settings.serverSettings = settings;
+                var dummyBrowser = new ServerBrowser();
+                dummyBrowser.ReloadFiles();
+                
+                var latestSave = dummyBrowser.spSaves.FirstOrDefault();
+                var latestReplay = dummyBrowser.mpReplays.FirstOrDefault();
+
+                if (latestReplay != null) {
+                    Log.Message("Multiplayer save loaded: " + latestReplay.displayName);
+                    new HostWindow(latestReplay, settings, true);
+                    return;
+                }
+                else { 
+                    Log.Message("Last multiplayer save was not found! Try to load a singleplayer save.");
+                }
+
+                if (latestSave != null) {
+                    Log.Message("Singleplayer save loaded: " + latestSave.displayName);
+                    new HostWindow(latestSave, settings, false);
+                    return;
+                }
+                else
+                {
+                    Log.Message("No valid save found! Stop...");
+                }
+
             }
         }
 
